@@ -13,7 +13,7 @@ class PostReader:
 
     def get_verification_set(self):
         # return the 20% of the messages in form hashmap with <message_word_list, POSITIVE/NEGATIVE>
-        pass
+        return []
 
     def get_word_set(self):
         # return all the present words in the learning set.
