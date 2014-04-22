@@ -3,6 +3,7 @@ from os.path import join
 import string
 from math import floor
 from random import shuffle
+from copy import deepcopy
 
 class PostReader:
     ''' General definition : 1.0 => positive, present ; 0.0 => negative, no present '''
@@ -17,9 +18,12 @@ class PostReader:
         self.pos_files = listdir(join(self.base_directory, self.pos_directory))
         self.neg_files = listdir(join(self.base_directory, self.neg_directory))
 
+        print("pr : creating word set ...")
         self.create_word_set()
+        print("pr : creating messages set ...")
         self.create_messages_set()
 
+        print("pr : creating training and verification set ...")
         shuffle(self.messages_set)
         index = floor(len(self.messages_set) * 0.8)
         self.training_set = self.messages_set[:index]
@@ -28,9 +32,9 @@ class PostReader:
     def create_word_set(self):
         ''' Create list containing all words in corpus
         '''
-        self.word_set = list()
-        self.word_set += self.read_files(self.pos_files, join(self.base_directory, self.pos_directory))
-        self.word_set += self.read_files(self.neg_files, join(self.base_directory, self.neg_directory))
+        self.word_set = set()
+        self.word_set = self.word_set.union(self.read_files(self.pos_files, join(self.base_directory, self.pos_directory)))
+        self.word_set = self.word_set.union(self.read_files(self.neg_files, join(self.base_directory, self.neg_directory)))
 
     def create_messages_set(self):
         ''' Create list of tuples containing each message and its classification
@@ -44,22 +48,22 @@ class PostReader:
     def fill_messages_set(self, files, directory, message_classification):
         for filename in files:
             words = self.read_files([filename], directory)
-            message_words = {}
-            for word in self.word_set:
-                if word in words:
-                    message_words[word] = 1.0
-                else:
-                    message_words[word] = 0.0
+
+            message_words = dict.fromkeys(self.word_set, 0.0)
+
+            for word in words:
+                message_words[word] = 1.0
+
             self.messages_set.append((message_words, message_classification))
 
     def read_files(self, files, directory):
         ''' Returns a list containing all words present in given files
         '''
-        words_list = list()
+        words_list = set()
         for filename in files:
             with open(join(directory, filename), 'r', -1, 'utf-8') as file:
                 for line in file.readlines():
-                    words_list += line.split(' ')
+                    words_list = words_list.union(set(line.split(' ')))
         return words_list
 
     def get_word_set(self):
