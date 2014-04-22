@@ -3,46 +3,20 @@ from PostReader import PostReader
 
 
 def main():
-    base_directory = ""
-    ignore_word_file = ""
+    base_directory = "corpus_short"
+    ignore_word_file = "corpus/frenchST.txt"
 
+    print ("post reading...")
     pr = PostReader(base_directory, ignore_word_file)
 
-    word_set = ['hello', 'world', 'elm', 'neuchatel', 'hirzel']
-    neural_network = NeuralNetwork(word_set)
+    print("creating neural network...")
+    neural_network = NeuralNetwork(pr.get_word_set())
 
-    training_set = [
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-    ]
-    neural_network.train(training_set)
+    print("training...")
+    neural_network.train(pr.get_training_set())
 
-    msgs_to_classify = [
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 1.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0}, 1.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-        ({'hello': 0.0, 'world': 1.0, 'elm': 1.0, 'neuchatel': 0.0, 'hirzel': 0.0, }, 0.0),
-    ]
-
-    for msg in msgs_to_classify:
+    print("classifying...")
+    for msg in pr.get_verification_set():
         print("result: %s    expected: %s" % (neural_network.classify(msg[0]), msg[1]))
 
 
