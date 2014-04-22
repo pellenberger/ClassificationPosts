@@ -4,6 +4,7 @@ import string
 from math import floor
 from random import shuffle
 from copy import deepcopy
+import re
 
 class PostReader:
     ''' General definition : 1.0 => positive, present ; 0.0 => negative, no present '''
@@ -17,6 +18,9 @@ class PostReader:
         self.ignored_word_file = ignored_word_file
         self.pos_files = listdir(join(self.base_directory, self.pos_directory))
         self.neg_files = listdir(join(self.base_directory, self.neg_directory))
+
+        # read ignored words
+        with open(self.ignored_word_file, 'r', -1, 'utf-8') as file: self.ignored_words = [str.strip(line) for line in file.readlines()]
 
         print("pr : creating word set ...")
         self.create_word_set()
@@ -63,8 +67,16 @@ class PostReader:
         for filename in files:
             with open(join(directory, filename), 'r', -1, 'utf-8') as file:
                 for line in file.readlines():
-                    words_list = words_list.union(set(line.split(' ')))
+                    line = self.filter_text(line)
+                    words_list = words_list.union(set([word for word in line.split(' ') if len(word) > 0]))
         return words_list
+
+    def filter_text(self, text):
+        text = re.sub(r'[%s\n]' % re.escape(string.punctuation), '', text)
+        text = re.sub(r'\d', '', text)
+        for word in self.ignored_words : text = re.sub(r'\b%s\b' % word, '', text)
+        text = str.lower(text)
+        return text
 
     def get_word_set(self):
         return self.word_set
