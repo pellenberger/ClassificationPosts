@@ -12,10 +12,11 @@ class PostReader:
     pos_directory = "pos"
     neg_directory = "neg"
 
-    def __init__(self, base_directory, ignored_word_file):
+    def __init__(self, base_directory, ignored_word_file, filter_active=True):
         ''' Hypothesis : base_directory contains the following directories : pos and neg '''
         self.base_directory = base_directory
         self.ignored_word_file = ignored_word_file
+        self.filter_active = filter_active
         self.pos_files = listdir(join(self.base_directory, self.pos_directory))
         self.neg_files = listdir(join(self.base_directory, self.neg_directory))
 
@@ -72,6 +73,9 @@ class PostReader:
         return words_list
 
     def filter_text(self, text):
+        if not self.filter_active:
+            return text
+
         text = re.sub(r'[%s\n]' % re.escape(string.punctuation), '', text)
         text = re.sub(r'\d', '', text)
         for word in self.ignored_words : text = re.sub(r'\b%s\b' % word, '', text)
