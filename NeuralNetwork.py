@@ -8,13 +8,14 @@ class Neuron:
         self.input_weights = {}
         self._last_inputs = {}
         self.last_output = 0.0
+        self.bias = random.uniform(-1.0, 1.0)
 
         self._init_input_weights(inputs)
         pass
 
     def _init_input_weights(self, inputs):
         for i in inputs:
-            self.input_weights[i] = random.random()
+            self.input_weights[i] = random.uniform(-1.0, 1.0)
 
         print(u"Neuron init configuration: %s" % self.input_weights)
 
@@ -22,6 +23,7 @@ class Neuron:
         assert len(input_vector) == self.nb_inputs
 
         weighted_values = [self.input_weights[key] * input_vector[key] for key in input_vector.keys()]
+        weighted_values.append(self.bias)
 
         self._last_inputs = input_vector
         self.last_output = Neuron.sigma(sum(weighted_values))
@@ -32,9 +34,11 @@ class Neuron:
             delta_weight = -learning_rate * delta_k * self._last_inputs[k]
             self.input_weights[k] += delta_weight
 
+        self.bias = self.bias - learning_rate * delta_k
+
     @staticmethod
     def sigma(x):
-        return 1 / (1 + math.exp(-x))
+        return 1.0 / (1.0 + math.exp(-x))
 
     @staticmethod
     def sigma_derivative(x):
@@ -48,20 +52,20 @@ class Neuron:
 
 class NeuralNetwork:
     NB_MAX_ITERATIONS = 10
-    NB_HIDDEN_NEURON = 3
     ALPHA_LEARNING_RATE = 0.2
 
-    def __init__(self, inputs):
+    def __init__(self, inputs, nb_hidden_neurons):
         self.nb_max_inputs = len(inputs)
+        self.nb_hidden_neurons = nb_hidden_neurons
         self.hidden_neurons = []
         print("Init final neuron: ")
-        self.final_neuron = Neuron(range(0, NeuralNetwork.NB_HIDDEN_NEURON))
+        self.final_neuron = Neuron(range(0, self.nb_hidden_neurons))
 
         print("Init hidden neuron: ")
         self._init_hidden_neuron(inputs)
 
     def _init_hidden_neuron(self, inputs):
-        for i in range(0, NeuralNetwork.NB_HIDDEN_NEURON):
+        for i in range(0, self.nb_hidden_neurons):
             self.hidden_neurons.append(Neuron(inputs))
 
     def train(self, learning_set):
@@ -73,21 +77,24 @@ class NeuralNetwork:
             for entry in learning_set:
                 actual = self.classify(entry[0])
                 prediction = entry[1]
-                if not Neuron.equal(actual, prediction):
-                    delta_k = NeuralNetwork.delta_k(actual, prediction)
+                #if not Neuron.equal(actual, prediction):
+                no_changement = False
 
-                    weights_jk = [self.final_neuron.input_weights[k] for k in self.final_neuron.input_weights.keys()]
+                delta_k = NeuralNetwork.delta_k(actual, prediction)
 
-                    delta_j_dict = {}
-                    for neuron in self.hidden_neurons:
-                        delta_j_dict[neuron] = NeuralNetwork.delta_j(neuron.last_output, delta_k, weights_jk)
+                weights_jk = [self.final_neuron.input_weights[k] for k in self.final_neuron.input_weights.keys()]
 
-                    self.final_neuron.apply_back_propagation(NeuralNetwork.ALPHA_LEARNING_RATE, delta_k)
+                delta_j_dict = {}
+                for neuron in self.hidden_neurons:
+                    delta_j_dict[neuron] = NeuralNetwork.delta_j(neuron.last_output, delta_k, weights_jk)
 
-                    for neuron in self.hidden_neurons:
-                        neuron.apply_back_propagation(NeuralNetwork.ALPHA_LEARNING_RATE, delta_j_dict[neuron])
+                self.final_neuron.apply_back_propagation(NeuralNetwork.ALPHA_LEARNING_RATE, delta_k)
 
-                    no_changement = False
+                for neuron in self.hidden_neurons:
+                    neuron.apply_back_propagation(NeuralNetwork.ALPHA_LEARNING_RATE, delta_j_dict[neuron])
+
+
+                actualNew = self.classify(entry[0])
 
             safety_counter += 1
 
@@ -110,6 +117,7 @@ class NeuralNetwork:
 
     @staticmethod
     def delta_k(output_k, target_k):
+        # TODO: try to inverse output_k and target_k sub.
         return output_k * (1 - output_k) * (output_k - target_k)
 
     @staticmethod
@@ -120,10 +128,9 @@ class NeuralNetwork:
         assert len(input_vector) == self.nb_max_inputs
 
         hidden_neuron_results = {}
-        for i in range(0, NeuralNetwork.NB_HIDDEN_NEURON):
+        for i in range(0, self.nb_hidden_neurons):
             hidden_neuron_results[i] = self.hidden_neurons[i].calc(input_vector)
 
         final = self.final_neuron.calc(hidden_neuron_results)
         print("final: %s" % final)
-        return 1.0 if Neuron.equal(final, 1.0) else 0.0
-
+        return final #1.0 if final >= 0.5 else 0.0
