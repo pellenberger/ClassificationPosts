@@ -6,18 +6,20 @@ def main():
     base_directory = "corpus_short"
     ignore_word_file = "corpus/frenchST.txt"
 
-    print ("post reading...")
-    pr = PostReader(base_directory, ignore_word_file)
+    print("post reading...")
+    pr = PostReader(base_directory, ignore_word_file, False)
 
     print("creating neural network...")
-    neural_network = NeuralNetwork(pr.get_word_set())
+    nb_hidden_neurons = 10
+    neural_network = NeuralNetwork(pr.get_word_set(), nb_hidden_neurons)
 
     print("training...")
     neural_network.train(pr.get_training_set())
 
     print("classifying...")
     for msg in pr.get_verification_set():
-        print("result: %s    expected: %s" % (neural_network.classify(msg[0]), msg[1]))
+        final = neural_network.classify(msg[0])
+        print("result: %s    expected: %s" % (final, msg[1]))
 
 
 if __name__ == "__main__":
