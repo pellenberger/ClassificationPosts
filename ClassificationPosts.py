@@ -6,14 +6,18 @@ import time
 def main():
     base_directory = "corpus_short"
     ignore_word_file = "corpus/frenchST.txt"
-
-    print("post reading...")
     filtered = True
+    nb_hidden_neurons = 20
+    nb_max_iteration = 10
+
+    test(base_directory, ignore_word_file, filtered, nb_hidden_neurons, nb_max_iteration)
+
+
+def test(base_directory, ignore_word_file, filtered, nb_hidden_neurons, nb_max_iteration):
+    print("post reading...")
     pr = PostReader(base_directory, ignore_word_file, filtered)
 
     print("creating neural network...")
-    nb_hidden_neurons = 20
-    nb_max_iteration = 10
     nn = NeuralNetwork(pr.get_word_set(), nb_hidden_neurons, nb_max_iteration)
 
     print("training...")
