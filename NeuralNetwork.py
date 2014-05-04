@@ -1,7 +1,6 @@
 import random
 import math
 
-
 class Neuron:
     def __init__(self, inputs):
         self.nb_inputs = len(inputs)
@@ -75,7 +74,7 @@ class NeuralNetwork:
                 actual = self.classify(entry[0])
                 prediction = entry[1]
 
-                if not abs(actual - prediction) < 0.2:
+                if not abs(actual - prediction) < 0.3:
                     no_changement = False
 
                 delta_k = NeuralNetwork.delta_k(actual, prediction)
@@ -97,6 +96,8 @@ class NeuralNetwork:
             if no_changement or safety_counter >= self.nb_max_iteration:
                 convergence = True
                 print("Convergence reached")
+
+        return safety_counter
 
     @staticmethod
     def hidden_layer_error(output_i, delta_j):
