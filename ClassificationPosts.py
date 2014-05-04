@@ -10,8 +10,8 @@ def main():
     pr = PostReader(base_directory, ignore_word_file, False)
 
     print("creating neural network...")
-    nb_hidden_neurons = 20
-    nb_max_iteration = 1000
+    nb_hidden_neurons = 25
+    nb_max_iteration = 100
     nn = NeuralNetwork(pr.get_word_set(), nb_hidden_neurons, nb_max_iteration)
 
     print("training...")
@@ -28,6 +28,7 @@ def main():
     print("=======================")
     print("verification set length: %s" % len(verification_set))
     print("nb correct classified  : %s" % nb_correct)
+    print("rate                   : %s" % (nb_correct / len(verification_set) * 100))
     print("=======================")
 
 
