@@ -17,8 +17,6 @@ class Neuron:
         for i in inputs:
             self.input_weights[i] = random.uniform(-1.0, 1.0)
 
-        print(u"Neuron init configuration: %s" % self.input_weights)
-
     def calc(self, input_vector):
         assert len(input_vector) == self.nb_inputs
 
@@ -51,17 +49,16 @@ class Neuron:
 
 
 class NeuralNetwork:
-    NB_MAX_ITERATIONS = 10
     ALPHA_LEARNING_RATE = 0.2
 
-    def __init__(self, inputs, nb_hidden_neurons):
+    def __init__(self, inputs, nb_hidden_neurons, nb_max_iteration):
         self.nb_max_inputs = len(inputs)
         self.nb_hidden_neurons = nb_hidden_neurons
+        self.nb_max_iteration = nb_max_iteration
         self.hidden_neurons = []
-        print("Init final neuron: ")
+
         self.final_neuron = Neuron(range(0, self.nb_hidden_neurons))
 
-        print("Init hidden neuron: ")
         self._init_hidden_neuron(inputs)
 
     def _init_hidden_neuron(self, inputs):
@@ -77,8 +74,9 @@ class NeuralNetwork:
             for entry in learning_set:
                 actual = self.classify(entry[0])
                 prediction = entry[1]
-                #if not Neuron.equal(actual, prediction):
-                no_changement = False
+
+                if not abs(actual - prediction) < 0.2:
+                    no_changement = False
 
                 delta_k = NeuralNetwork.delta_k(actual, prediction)
 
@@ -93,19 +91,12 @@ class NeuralNetwork:
                 for neuron in self.hidden_neurons:
                     neuron.apply_back_propagation(NeuralNetwork.ALPHA_LEARNING_RATE, delta_j_dict[neuron])
 
-
-                actualNew = self.classify(entry[0])
-
             safety_counter += 1
 
             print("Iteration %s" % safety_counter)
-            if no_changement or safety_counter >= NeuralNetwork.NB_MAX_ITERATIONS:
+            if no_changement or safety_counter >= self.nb_max_iteration:
                 convergence = True
                 print("Convergence reached")
-
-        print(u"Neuron final configuration: %s" % self.final_neuron.input_weights)
-        for neuron in self.hidden_neurons:
-            print(u"Neuron final configuration: %s" % neuron.input_weights)
 
     @staticmethod
     def hidden_layer_error(output_i, delta_j):
@@ -132,5 +123,8 @@ class NeuralNetwork:
             hidden_neuron_results[i] = self.hidden_neurons[i].calc(input_vector)
 
         final = self.final_neuron.calc(hidden_neuron_results)
-        print("final: %s" % final)
-        return final #1.0 if final >= 0.5 else 0.0
+        return final
+
+    @staticmethod
+    def threshold(value):
+        return 1.0 if value >= 0.5 else 0.0
