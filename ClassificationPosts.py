@@ -7,10 +7,10 @@ def main():
     base_directory = "corpus_short"
     ignore_word_file = "corpus/frenchST.txt"
     filtered = True
-    nb_hidden_neurons = 20
-    nb_max_iteration = 10
+    nb_max_iteration = 100
 
-    test(base_directory, ignore_word_file, filtered, nb_hidden_neurons, nb_max_iteration)
+    for nb_hidden_neurons in range(2, 80, 5):
+        test(base_directory, ignore_word_file, filtered, nb_hidden_neurons, nb_max_iteration)
 
 
 def test(base_directory, ignore_word_file, filtered, nb_hidden_neurons, nb_max_iteration):

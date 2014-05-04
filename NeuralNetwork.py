@@ -92,10 +92,8 @@ class NeuralNetwork:
 
             safety_counter += 1
 
-            print("Iteration %s" % safety_counter)
             if no_changement or safety_counter >= self.nb_max_iteration:
                 convergence = True
-                print("Convergence reached")
 
         return safety_counter
 
